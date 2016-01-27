@@ -1,0 +1,24 @@
+{
+  "name" : "mt-olympus/kharon-hermes",
+  "description" : "Kharon collector for Hermes",
+  "require" : {
+    "mt-olympus/hermes" : "~0.9"
+  },
+  "license" : "MIT",
+  "keywords" : [ "kharon", "hermes", "zf2" ],
+  "autoload" : {
+    "psr-4" : {
+      "Kharon\\Hermes\\" : "src/"
+    },
+    "classmap" : [ "./" ]
+  },
+  "type" : "library",
+  "config" : {
+    "process-timeout" : 5000
+  },
+  "homepage" : "https://github.com/mt-olympus/kharon-hermes",
+  "authors" : [ {
+    "name" : "Leandro Silva",
+    "email" : "leandro@leandrosilva.info"
+  } ]
+}
