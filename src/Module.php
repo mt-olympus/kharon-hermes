@@ -90,6 +90,18 @@ class Module implements AutoloaderProviderInterface
 
         $hermes = $serviceLocator->get('hermes');
         $em = $hermes->getEventManager();
+        $em->attach('request.pre', function (Event $e) use (
+            $serviceLocator,
+            $serviceName) {
+
+                $request = $serviceLocator->get('Request');
+
+                /* @var \Hermes\Api\Client $hermes */
+                $hermes = $e->getTarget();
+                $hermes->importRequestId($request);
+                $hermes->incrementRequestDepth($request);
+        }, 100);
+
         $em->attach('request.post', function (Event $e) use (
                 $serviceLocator,
                 $serviceName,
