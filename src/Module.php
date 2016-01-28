@@ -15,7 +15,7 @@ class Module implements AutoloaderProviderInterface
 {
     private function prepareData($data, $request)
     {
-        $data['date'] = microtime(true);
+        $data['date'] = microtime(true);//date('Y-m-d H:i:s');
         $data['method'] = $request->getMethod();
 
         $header = $request->getHeader('X-Request-Id');
@@ -31,7 +31,12 @@ class Module implements AutoloaderProviderInterface
         $header = $request->getHeader('X-Request-Time');
         if ($header) {
             $requestTime = $header->getFieldValue();
-            $data['request_time'] = $requestTime;
+            $data['request_time'] = str_replace('ms','',$requestTime);
+        }
+        $header = $request->getHeader('X-Request-Depth');
+        if ($header) {
+            $requestTime = $header->getFieldValue();
+            $data['request_depth'] = $requestTime;
         }
 
         if (!$request->isGet()) {
@@ -50,13 +55,13 @@ class Module implements AutoloaderProviderInterface
         $serviceName = isset($config['hermes']['service_name']) ? $config['hermes']['service_name'] : '';
         $kharonDir = isset($config['kharon']['agent_dir']) ? $config['kharon']['agent_dir'] : 'data/kharon';
         $kharonDir .= '/requests';
-        $logFile = $kharonDir . '/request-' . getmypid() . '-' . microtime(true) . '.kharon';
 
+        /*
         $e->getApplication()->getEventManager()->attach(\Zend\Mvc\MvcEvent::EVENT_DISPATCH,
             function (MvcEvent $e) use (
                 $serviceLocator,
                 $serviceName,
-                $logFile) {
+                $kharonDir) {
             if (!$e->getRequest() instanceof Request) {
                 return;
             }
@@ -78,26 +83,30 @@ class Module implements AutoloaderProviderInterface
 
             $data = $this->prepareData($data, $request);
 
+            $logFile = $kharonDir . '/in-' . getmypid() . '-' . microtime(true) . '.kharon';
             file_put_contents($logFile, json_encode($data, null, 100));
         }, 100);
+        */
 
         $hermes = $serviceLocator->get('hermes');
         $em = $hermes->getEventManager();
         $em->attach('request.post', function (Event $e) use (
                 $serviceLocator,
                 $serviceName,
-                $logFile) {
+                $kharonDir) {
 
             /* @var \Hermes\Api\Client $hermes */
             $hermes = $e->getTarget();
             $request = $hermes->getZendClient()->getRequest();
 
+            $sourceRequest = $serviceLocator->get('Request');
+
             $data = [
-                'status' => 'success',
+                'status' => 1,
                 'source' => [
                     'service' => $serviceName,
                     'server' => $_SERVER['SERVER_ADDR'],
-                    'uri' => $_SERVER['REQUEST_URI'],
+                    'uri' => $sourceRequest->getUriString(),
                 ],
                 'destination' => [
                     'service' => $hermes->getServiceName(),
@@ -109,26 +118,26 @@ class Module implements AutoloaderProviderInterface
 
             $data = $this->prepareData($data, $request);
 
+            $logFile = $kharonDir . '/success-' . getmypid() . '-' . microtime(true) . '.kharon';
             file_put_contents($logFile, json_encode($data, null, 100));
         }, 100);
 
         $em->attach('request.fail', function (Event $e) use (
                 $serviceLocator,
                 $serviceName,
-                $logFile) {
+                $kharonDir) {
             /* @var \Hermes\Api\Client $hermes */
             $hermes = $e->getTarget();
             $request = $hermes->getZendClient()->getRequest();
 
-            $config = $serviceLocator->get('Config');
-            $serviceName = isset($config['hermes']['service_name']) ? $config['hermes']['service_name'] : '';
+            $sourceRequest = $serviceLocator->get('Request');
 
             $data = [
-                'status' => 'failed',
+                'status' => 0,
                 'source' => [
                     'service' => $serviceName,
                     'server' => $_SERVER['SERVER_ADDR'],
-                    'uri' => $_SERVER['REQUEST_URI'],
+                    'uri' => $sourceRequest->getUriString(),
                 ],
                 'destination' => [
                     'service' => $hermes->getServiceName(),
@@ -143,6 +152,7 @@ class Module implements AutoloaderProviderInterface
 
             $data = $this->prepareData($data, $request);
 
+            $logFile = $kharonDir . '/failed-' . getmypid() . '-' . microtime(true) . '.kharon';
             file_put_contents($logFile, json_encode($data, null, 100));
         }, 100);
     }
