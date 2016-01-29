@@ -54,7 +54,7 @@ class Module implements AutoloaderProviderInterface
         $config = $serviceLocator->get('Config');
         $serviceName = isset($config['hermes']['service_name']) ? $config['hermes']['service_name'] : '';
         $kharonDir = isset($config['kharon']['agent_dir']) ? $config['kharon']['agent_dir'] : 'data/kharon';
-        $kharonDir .= '/requests';
+        $kharonDir .= '/hermes';
 
         /*
         $e->getApplication()->getEventManager()->attach(\Zend\Mvc\MvcEvent::EVENT_DISPATCH,
