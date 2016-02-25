@@ -15,7 +15,7 @@ class Module implements AutoloaderProviderInterface
 {
     private function prepareData($data, $request)
     {
-        $data['date'] = microtime(true);//date('Y-m-d H:i:s');
+        $data['date'] = microtime(true);
         $data['method'] = $request->getMethod();
 
         $header = $request->getHeader('X-Request-Id');
@@ -56,38 +56,6 @@ class Module implements AutoloaderProviderInterface
         $kharonDir = isset($config['kharon']['agent_dir']) ? $config['kharon']['agent_dir'] : 'data/kharon';
         $kharonDir .= '/hermes';
 
-        /*
-        $e->getApplication()->getEventManager()->attach(\Zend\Mvc\MvcEvent::EVENT_DISPATCH,
-            function (MvcEvent $e) use (
-                $serviceLocator,
-                $serviceName,
-                $kharonDir) {
-            if (!$e->getRequest() instanceof Request) {
-                return;
-            }
-            $request = $e->getRequest();
-
-            $data = [
-                'status' => 'success',
-                'destination' => [
-                    'service' => $serviceName,
-                    'server' => $request->getUri()->getHost(),
-                    'uri' => $request->getUriString(),
-                ],
-                'source' => [
-                    'server' => $_SERVER['REMOTE_ADDR'],
-                    'service' => $request->getHeader('X-Request-Name') ? $request->getHeader('X-Request-Name')->getFieldValue() : '',
-                    'uri' => '',
-                ],
-            ];
-
-            $data = $this->prepareData($data, $request);
-
-            $logFile = $kharonDir . '/in-' . getmypid() . '-' . microtime(true) . '.kharon';
-            file_put_contents($logFile, json_encode($data, null, 100));
-        }, 100);
-        */
-
         $hermes = $serviceLocator->get('hermes');
         $em = $hermes->getEventManager();
         $em->attach('request.pre', function (Event $e) use (
@@ -112,13 +80,18 @@ class Module implements AutoloaderProviderInterface
             $request = $hermes->getZendClient()->getRequest();
 
             $sourceRequest = $serviceLocator->get('Request');
+            if ($sourceRequest instanceof \Zend\Http\Request) {
+                $sourceUri = $sourceRequest->getUriString();
+            } else {
+                $sourceUri = 'console';
+            }
 
             $data = [
                 'status' => 1,
                 'source' => [
                     'service' => $serviceName,
                     'server' => $_SERVER['SERVER_ADDR'],
-                    'uri' => $sourceRequest->getUriString(),
+                    'uri' => $sourceUri,
                 ],
                 'destination' => [
                     'service' => $hermes->getServiceName(),
@@ -143,13 +116,18 @@ class Module implements AutoloaderProviderInterface
             $request = $hermes->getZendClient()->getRequest();
 
             $sourceRequest = $serviceLocator->get('Request');
+            if ($sourceRequest instanceof \Zend\Http\Request) {
+                $sourceUri = $sourceRequest->getUriString();
+            } else {
+                $sourceUri = 'console';
+            }
 
             $data = [
                 'status' => 0,
                 'source' => [
                     'service' => $serviceName,
                     'server' => $_SERVER['SERVER_ADDR'],
-                    'uri' => $sourceRequest->getUriString(),
+                    'uri' => $sourceUri,
                 ],
                 'destination' => [
                     'service' => $hermes->getServiceName(),
