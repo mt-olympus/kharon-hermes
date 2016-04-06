@@ -53,10 +53,12 @@ class Module implements AutoloaderProviderInterface
         $serviceLocator = $e->getApplication()->getServiceManager();
         $config = $serviceLocator->get('Config');
         $serviceName = isset($config['hermes']['service_name']) ? $config['hermes']['service_name'] : '';
+        $apiKey = isset($config['kharon']['api_key']) ? $config['kharon']['api_key'] : null;
+        $hermesKey = isset($config['kharon']['hermes_key']) ? $config['kharon']['hermes_key'] : 'hermes';
         $kharonDir = isset($config['kharon']['agent_dir']) ? $config['kharon']['agent_dir'] : 'data/kharon';
         $kharonDir .= '/hermes';
 
-        $hermes = $serviceLocator->get('hermes');
+        $hermes = $serviceLocator->get($hermesKey);
         $em = $hermes->getEventManager();
         $em->attach('request.pre', function (Event $e) use (
             $serviceLocator,
@@ -73,7 +75,8 @@ class Module implements AutoloaderProviderInterface
         $em->attach('request.post', function (Event $e) use (
                 $serviceLocator,
                 $serviceName,
-                $kharonDir) {
+                $kharonDir,
+                $apiKey) {
 
             /* @var \Hermes\Api\Client $hermes */
             $hermes = $e->getTarget();
@@ -101,6 +104,10 @@ class Module implements AutoloaderProviderInterface
                 'http_code' => $hermes->getZendClient()->getResponse()->getStatusCode(),
             ];
 
+            if (!empty($apiKey)) {
+                $data['api_key'] = $apiKey;
+            }
+
             $data = $this->prepareData($data, $request);
 
             $logFile = $kharonDir . '/success-' . getmypid() . '-' . microtime(true) . '.kharon';
@@ -110,7 +117,8 @@ class Module implements AutoloaderProviderInterface
         $em->attach('request.fail', function (Event $e) use (
                 $serviceLocator,
                 $serviceName,
-                $kharonDir) {
+                $kharonDir,
+                $apiKey) {
             /* @var \Hermes\Api\Client $hermes */
             $hermes = $e->getTarget();
             $request = $hermes->getZendClient()->getRequest();
@@ -135,6 +143,10 @@ class Module implements AutoloaderProviderInterface
                     'uri' => $request->getUriString(),
                 ],
             ];
+
+            if (!empty($apiKey)) {
+                $data['api_key'] = $apiKey;
+            }
 
             $exception = $e->getParams();
             $data['http_code'] = $exception->getCode();
