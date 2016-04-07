@@ -52,6 +52,12 @@ class Module implements AutoloaderProviderInterface
     {
         $serviceLocator = $e->getApplication()->getServiceManager();
         $config = $serviceLocator->get('Config');
+        $enabled = isset($config['kharon']['enabled']) ? (bool) $config['kharon']['enabled'] : false;
+
+        if ($enabled !== true) {
+            return;
+        }
+
         $serviceName = isset($config['hermes']['service_name']) ? $config['hermes']['service_name'] : '';
         $apiKey = isset($config['kharon']['api_key']) ? $config['kharon']['api_key'] : null;
         $hermesKey = isset($config['kharon']['hermes_key']) ? $config['kharon']['hermes_key'] : 'hermes';
