@@ -68,6 +68,7 @@ class Collector
         $kharonDir = $this->kharonDir;
         $apiKey = $this->apiKey;
         $sourceRequest = $this->sourceRequest;
+        $serviceName = $this->serviceName;
 
         $em = $hermes->getEventManager();
         $em->attach('request.pre', function (Event $e) use ($sourceRequest) {
@@ -84,6 +85,7 @@ class Collector
 
         $em->attach('request.post', function (Event $e) use (
             $sourceRequest,
+            $serviceName,
             $kharonDir,
             $apiKey
         ) {
@@ -105,7 +107,7 @@ class Collector
             $data = [
                 'status' => 1,
                 'source' => [
-                    'service' => $hermes->getServiceName(),
+                    'service' => $serviceName,
                     'server' => $_SERVER['SERVER_ADDR'],
                     'uri' => $sourceUri,
                 ],
