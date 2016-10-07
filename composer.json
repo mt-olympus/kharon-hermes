@@ -2,7 +2,8 @@
   "name" : "mt-olympus/kharon-hermes",
   "description" : "Kharon collector for Hermes",
   "require" : {
-    "mt-olympus/hermes" : "~0.9"
+    "mt-olympus/hermes" : "^1.0.1",
+    "psr/http-message" : "^1.0.1"
   },
   "license" : "MIT",
   "keywords" : [ "kharon", "hermes", "zf2" ],
