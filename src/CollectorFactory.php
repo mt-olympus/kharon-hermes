@@ -16,6 +16,7 @@ class CollectorFactory implements FactoryInterface
             'service_name' => isset($config['hermes']['service_name']) ? $config['hermes']['service_name'] : '',
             'api_key' => isset($config['kharon']['api_key']) ? $config['kharon']['api_key'] : null,
             'kharon_dir' => isset($config['kharon']['agent_dir']) ? $config['kharon']['agent_dir'] : 'data/kharon',
+            'hermes_log' => isset($config['kharon']['hermes_log']) ? $config['kharon']['hermes_log'] : null,
         ];
         $collectorConfig['kharon_dir'] .= '/hermes';
 
