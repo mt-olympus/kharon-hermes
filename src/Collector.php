@@ -11,9 +11,11 @@ use Zend\Http\PhpEnvironment\Request;
  */
 class Collector
 {
+    private $enabled;
     private $serviceName;
     private $apiKey;
     private $kharonDir;
+    private $hermesLog;
     private $sourceRequest;
 
     private function prepareData($data, $request)
@@ -53,9 +55,11 @@ class Collector
 
     public function __construct($config = [])
     {
+        $this->enabled = $config['enabled'] ?? false;
         $this->serviceName = $config['service_name'];
         $this->apiKey = $config['api_key'];
         $this->kharonDir = $config['kharon_dir'];
+        $this->hermesLog = $config['hermes_log'];
     }
 
     public function setSourceRequest($request)
@@ -65,6 +69,10 @@ class Collector
 
     public function attach(Client $hermes)
     {
+        if ($this->enabled == false) {
+            return;
+        }
+
         $kharonDir = $this->kharonDir;
         $apiKey = $this->apiKey;
         $sourceRequest = $this->sourceRequest;
@@ -125,7 +133,7 @@ class Collector
 
             $data = $this->prepareData($data, $request);
 
-            $logFile = $kharonDir . '/success-' . getmypid() . '-' . microtime(true) . '.kharon';
+            $logFile = !empty($this->hermesLog) ? $this->hermesLog : $kharonDir . '/success-' . getmypid() . '-' . microtime(true) . '.kharon';
             file_put_contents($logFile, json_encode($data, null, 100));
         }, 100);
 
@@ -172,7 +180,7 @@ class Collector
 
             $data = $this->prepareData($data, $request);
 
-            $logFile = $kharonDir . '/failed-' . getmypid() . '-' . microtime(true) . '.kharon';
+            $logFile = !empty($this->hermesLog) ? $this->hermesLog : $kharonDir . '/failed-' . getmypid() . '-' . microtime(true) . '.kharon';
             file_put_contents($logFile, json_encode($data, null, 100));
         }, 100);
     }

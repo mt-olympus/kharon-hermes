@@ -13,9 +13,11 @@ class CollectorFactory implements FactoryInterface
         $config = $container->get('config');
 
         $collectorConfig = [
+            'enabled' => isset($config['kharon']['enabled']) ? $config['hermes']['enabled'] : false,
             'service_name' => isset($config['hermes']['service_name']) ? $config['hermes']['service_name'] : '',
             'api_key' => isset($config['kharon']['api_key']) ? $config['kharon']['api_key'] : null,
             'kharon_dir' => isset($config['kharon']['agent_dir']) ? $config['kharon']['agent_dir'] : 'data/kharon',
+            'hermes_log' => isset($config['kharon']['hermes_log']) ? $config['kharon']['hermes_log'] : null,
         ];
         $collectorConfig['kharon_dir'] .= '/hermes';
 
@@ -26,7 +28,8 @@ class CollectorFactory implements FactoryInterface
      * {@inheritDoc}
      * @see \Zend\ServiceManager\FactoryInterface::createService()
      */
-    public function createService(ServiceLocatorInterface $serviceLocator) {
+    public function createService(ServiceLocatorInterface $serviceLocator)
+    {
         return $this->__invoke($serviceLocator, Collector::class);
     }
 
