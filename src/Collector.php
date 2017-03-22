@@ -11,6 +11,7 @@ use Zend\Http\PhpEnvironment\Request;
  */
 class Collector
 {
+    private $enabled;
     private $serviceName;
     private $apiKey;
     private $kharonDir;
@@ -54,6 +55,7 @@ class Collector
 
     public function __construct($config = [])
     {
+        $this->enabled = $config['enabled'] ?? false;
         $this->serviceName = $config['service_name'];
         $this->apiKey = $config['api_key'];
         $this->kharonDir = $config['kharon_dir'];
@@ -67,6 +69,10 @@ class Collector
 
     public function attach(Client $hermes)
     {
+        if ($this->enabled == false) {
+            return;
+        }
+
         $kharonDir = $this->kharonDir;
         $apiKey = $this->apiKey;
         $sourceRequest = $this->sourceRequest;
