@@ -134,7 +134,7 @@ class Collector
             $data = $this->prepareData($data, $request);
 
             $logFile = !empty($this->hermesLog) ? $this->hermesLog : $kharonDir . '/success-' . getmypid() . '-' . microtime(true) . '.kharon';
-            file_put_contents($logFile, json_encode($data, null, 100));
+            file_put_contents($logFile, json_encode($data, null, 100) . PHP_EOL);
         }, 100);
 
         $em->attach('request.fail', function (Event $e) use (
@@ -181,7 +181,7 @@ class Collector
             $data = $this->prepareData($data, $request);
 
             $logFile = !empty($this->hermesLog) ? $this->hermesLog : $kharonDir . '/failed-' . getmypid() . '-' . microtime(true) . '.kharon';
-            file_put_contents($logFile, json_encode($data, null, 100));
+            file_put_contents($logFile, json_encode($data, null, 100) . PHP_EOL);
         }, 100);
     }
 }
